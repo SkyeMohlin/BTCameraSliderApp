@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 interface Point {
   x: number;
@@ -80,6 +80,7 @@ const BezierCurve: React.FC = () => {
     e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>
   ) => {
     if (draggingPoint !== null) {
+      e.preventDefault(); // Prevent scrolling when dragging
       const { pointIndex, type } = draggingPoint;
       const newPoints = [...points];
       const { x: newX, y: newY } = getCoordinates(e);
@@ -148,15 +149,37 @@ const BezierCurve: React.FC = () => {
     }`;
   };
 
+  useEffect(() => {
+    const svgElement = document.querySelector("svg");
+
+    const handleTouchMove = (e: TouchEvent) => {
+      onMouseMove(e as any); // Type casting to match the function signature
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      onMouseUp();
+    };
+
+    svgElement?.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
+    svgElement?.addEventListener("touchend", handleTouchEnd, {
+      passive: false,
+    });
+
+    return () => {
+      svgElement?.removeEventListener("touchmove", handleTouchMove);
+      svgElement?.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [onMouseMove, onMouseUp]);
+
   return (
     <svg
-      width="400"
+      width="300"
       height="300"
       style={{ border: "1px solid black" }}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
-      onTouchMove={onMouseMove}
-      onTouchEnd={onMouseUp}
     >
       {/* Path that represents the cubic Bézier curve */}
       {points.map((p, i) => (

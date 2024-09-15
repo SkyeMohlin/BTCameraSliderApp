@@ -52,6 +52,7 @@ const BezierCurve: React.FC = () => {
     e: React.MouseEvent<SVGCircleElement>
   ) => {
     setDraggingPoint({ pointIndex: index, type });
+    console.log(e);
   };
 
   const onMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {

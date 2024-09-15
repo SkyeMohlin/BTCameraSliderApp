@@ -156,7 +156,7 @@ const BezierCurve: React.FC = () => {
       onMouseMove(e as any); // Type casting to match the function signature
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
+    const handleTouchEnd = () => {
       onMouseUp();
     };
 

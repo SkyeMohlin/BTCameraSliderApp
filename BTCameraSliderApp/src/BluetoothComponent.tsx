@@ -1,5 +1,5 @@
 // src/BluetoothComponent.js
-import React, { useState } from "react";
+import { useState } from "react";
 
 const BluetoothComponent = () => {
   const [device, setDevice] = useState<BluetoothDevice>();
@@ -55,6 +55,7 @@ const BluetoothComponent = () => {
 
   return (
     <div>
+      <p>{device?.name}</p>
       <p>{characteristic?.uuid}</p>
       <p>{on}</p>
       <button onClick={requestDevice}>Connect to BLE Device</button>

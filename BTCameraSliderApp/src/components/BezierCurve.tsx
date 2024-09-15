@@ -46,39 +46,55 @@ const BezierCurve: React.FC = () => {
     type: "anchor" | "in-tangent" | "out-tangent";
   } | null>(null);
 
+  const getCoordinates = (
+    e: React.MouseEvent | React.TouchEvent
+  ): { x: number; y: number } => {
+    const svg = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
+    let clientX: number, clientY: number;
+
+    if ("touches" in e) {
+      const touch = e.touches[0];
+      clientX = touch.clientX;
+      clientY = touch.clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+
+    return {
+      x: clientX - svg.left,
+      y: clientY - svg.top,
+    };
+  };
+
   const onMouseDown = (
     index: number,
     type: "anchor" | "in-tangent" | "out-tangent",
-    e: React.MouseEvent<SVGCircleElement>
+    e: React.MouseEvent<SVGCircleElement> | React.TouchEvent<SVGCircleElement>
   ) => {
+    e.preventDefault();
     setDraggingPoint({ pointIndex: index, type });
-    console.log(e);
   };
 
-  const onMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
+  const onMouseMove = (
+    e: React.MouseEvent<SVGSVGElement> | React.TouchEvent<SVGSVGElement>
+  ) => {
     if (draggingPoint !== null) {
       const { pointIndex, type } = draggingPoint;
       const newPoints = [...points];
-
-      // Calculate new mouse positions relative to SVG
-      const svg = e.currentTarget.getBoundingClientRect();
-      const newX = e.clientX - svg.left;
-      const newY = e.clientY - svg.top;
+      const { x: newX, y: newY } = getCoordinates(e);
 
       if (type === "anchor") {
-        // Move both anchor and control points
         const deltaX = newX - newPoints[pointIndex].x;
         const deltaY = newY - newPoints[pointIndex].y;
         newPoints[pointIndex].x = newX;
         newPoints[pointIndex].y = newY;
 
-        // Update both in-tangent and out-tangent relative to anchor movement
         newPoints[pointIndex].inTx += deltaX;
         newPoints[pointIndex].inTy += deltaY;
         newPoints[pointIndex].outTx += deltaX;
         newPoints[pointIndex].outTy += deltaY;
       } else if (type === "in-tangent") {
-        // Restrict the in-tangent to the left of the anchor
         const restrictedInTx = Math.min(newX, newPoints[pointIndex].x);
         newPoints[pointIndex].inTx = restrictedInTx;
         newPoints[pointIndex].inTy = newY;
@@ -115,7 +131,6 @@ const BezierCurve: React.FC = () => {
     newPoints[index].joinedTangents = !newPoints[index].joinedTangents;
 
     if (newPoints[index].joinedTangents) {
-      // Mirror the in-tangent to the out-tangent when joined
       const deltaX = newPoints[index].x - newPoints[index].inTx;
       const deltaY = newPoints[index].y - newPoints[index].inTy;
       newPoints[index].outTx = newPoints[index].x + deltaX;
@@ -135,11 +150,13 @@ const BezierCurve: React.FC = () => {
 
   return (
     <svg
-      width="300"
+      width="400"
       height="300"
       style={{ border: "1px solid black" }}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}
+      onTouchMove={onMouseMove}
+      onTouchEnd={onMouseUp}
     >
       {/* Path that represents the cubic Bézier curve */}
       {points.map((p, i) => (
@@ -155,7 +172,6 @@ const BezierCurve: React.FC = () => {
             strokeDasharray={10}
           />
 
-          {/* Line from anchor to out-tangent */}
           <line
             x1={p.x}
             y1={p.y}
@@ -171,35 +187,33 @@ const BezierCurve: React.FC = () => {
             <path d={drawCurve(i)} stroke="blue" strokeWidth="2" fill="none" />
           )}
 
-          {/* Anchor Point */}
           <circle
             cx={p.x}
             cy={p.y}
             r={5}
             fill="orange"
             onMouseDown={(e) => onMouseDown(i, "anchor", e)}
+            onTouchStart={(e) => onMouseDown(i, "anchor", e)}
             onDoubleClick={() => onDoubleClickAnchor(i)}
           />
 
-          {/* In-Tangent */}
           <circle
             cx={p.inTx}
             cy={p.inTy}
             r={5}
             fill="green"
             onMouseDown={(e) => onMouseDown(i, "in-tangent", e)}
+            onTouchStart={(e) => onMouseDown(i, "in-tangent", e)}
           />
 
-          {/* Out-Tangent */}
           <circle
             cx={p.outTx}
             cy={p.outTy}
             r={5}
             fill="blue"
             onMouseDown={(e) => onMouseDown(i, "out-tangent", e)}
+            onTouchStart={(e) => onMouseDown(i, "out-tangent", e)}
           />
-
-          {/* Line from anchor to in-tangent */}
         </React.Fragment>
       ))}
     </svg>

@@ -86,7 +86,7 @@ const BluetoothComponent = () => {
           setOn("ON");
         }
         const data = encoder.encode(
-          "{type: object, key: A, value: {type: int, key: B, value: 48}}"
+          `{type: string, key: modeLight, value: ${on}}`
         );
         await characteristic.writeValue(data);
         console.log("Data sent successfully");

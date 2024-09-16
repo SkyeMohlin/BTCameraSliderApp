@@ -85,7 +85,9 @@ const BluetoothComponent = () => {
         } else {
           setOn("ON");
         }
-        const data = encoder.encode(stringPoints);
+        const data = encoder.encode(
+          "{type: object, key: A, value: {type: int, key: B, value: 48}}"
+        );
         await characteristic.writeValue(data);
         console.log("Data sent successfully");
       } catch (error) {

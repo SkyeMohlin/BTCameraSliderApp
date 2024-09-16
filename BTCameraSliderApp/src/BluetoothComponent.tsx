@@ -1,5 +1,36 @@
 // src/BluetoothComponent.js
 import { useState } from "react";
+import { Point } from "./components/BezierCurve";
+
+const points: Point[] = [
+  {
+    x: 50,
+    y: 200,
+    inTx: 30,
+    inTy: 150,
+    outTx: 100,
+    outTy: 50,
+    joinedTangents: true,
+  },
+  {
+    x: 150,
+    y: 200,
+    inTx: 150,
+    inTy: 150,
+    outTx: 150,
+    outTy: 50,
+    joinedTangents: true,
+  },
+  {
+    x: 250,
+    y: 200,
+    inTx: 250,
+    inTy: 150,
+    outTx: 200,
+    outTy: 50,
+    joinedTangents: true,
+  },
+];
 
 const BluetoothComponent = () => {
   const [device, setDevice] = useState<BluetoothDevice>();
@@ -7,6 +38,12 @@ const BluetoothComponent = () => {
     useState<BluetoothRemoteGATTCharacteristic>();
 
   const [on, setOn] = useState("OFF");
+
+  let stringPoints: string = "";
+  points.forEach((p) => {
+    stringPoints = stringPoints.concat(`{x: ${p.x}, y: ${p.y},}`);
+  });
+  console.log("string", stringPoints);
 
   const requestDevice = async () => {
     try {
@@ -37,12 +74,18 @@ const BluetoothComponent = () => {
     if (characteristic) {
       try {
         const encoder = new TextEncoder();
+
+        let stringPoints: string = "";
+        points.forEach((p) => {
+          stringPoints = stringPoints.concat(`{x: ${p.x}, y: ${p.y},}`);
+        });
+
         if (on == "ON") {
           setOn("OFF");
         } else {
           setOn("ON");
         }
-        const data = encoder.encode(on);
+        const data = encoder.encode(stringPoints);
         await characteristic.writeValue(data);
         console.log("Data sent successfully");
       } catch (error) {

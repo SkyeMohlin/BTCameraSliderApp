@@ -5,7 +5,7 @@ import { Point } from "./components/BezierCurve";
 const points: Point[] = [
   {
     x: 50,
-    y: 200,
+    y: 0,
     inTx: 30,
     inTy: 150,
     outTx: 100,

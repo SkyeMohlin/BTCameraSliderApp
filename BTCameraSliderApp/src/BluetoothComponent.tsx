@@ -1,46 +1,11 @@
 // src/BluetoothComponent.js
-import { Point } from "./components/BezierCurve";
 import useBluetooth from "./useBluetooth";
-
-const points: Point[] = [
-  {
-    x: 50,
-    y: 0,
-    inTx: 30,
-    inTy: 150,
-    outTx: 100,
-    outTy: 50,
-    joinedTangents: true,
-  },
-  {
-    x: 150,
-    y: 200,
-    inTx: 150,
-    inTy: 150,
-    outTx: 150,
-    outTy: 50,
-    joinedTangents: true,
-  },
-  {
-    x: 250,
-    y: 200,
-    inTx: 250,
-    inTy: 150,
-    outTx: 200,
-    outTy: 50,
-    joinedTangents: true,
-  },
-];
+import useBluetoothData from "./useBluetoothData";
 
 const BluetoothComponent = () => {
+  const { sendData } = useBluetoothData();
   const { device, setDevice, characteristic, setCharacteristic } =
     useBluetooth();
-
-  let stringPoints: string = "";
-  points.forEach((p) => {
-    stringPoints = stringPoints.concat(`{x: ${p.x}, y: ${p.y},}`);
-  });
-  console.log("string", stringPoints);
 
   const requestDevice = async () => {
     try {
@@ -67,28 +32,6 @@ const BluetoothComponent = () => {
     }
   };
 
-  const sendData = async (
-    type: string = "string",
-    key: string,
-    data: string
-  ) => {
-    if (characteristic) {
-      try {
-        const encoder = new TextEncoder();
-
-        const encodedData = encoder.encode(
-          `{type: ${type}, key: ${key}, value: ${data}}`
-        );
-        await characteristic.writeValue(encodedData);
-        console.log("Data sent successfully");
-      } catch (error) {
-        console.error("Error sending data:", error);
-      }
-    } else {
-      console.error("No characteristic available");
-    }
-  };
-
   return (
     <div>
       <p>{device?.name}</p>
@@ -98,18 +41,6 @@ const BluetoothComponent = () => {
         style={{ display: "flex", flexDirection: "column", gap: "10px" }}
       >
         <button onClick={requestDevice}>Connect to BLE Device</button>
-        <button
-          onClick={() => {
-            let stringPoints: string = "";
-            points.forEach((p) => {
-              stringPoints = stringPoints.concat(`{x: ${p.x}, y: ${p.y},}`);
-            });
-
-            sendData("string", "XAxisPoints", stringPoints);
-          }}
-        >
-          Send Points
-        </button>
 
         <button onClick={() => sendData("", "bPlay", "")}>Play</button>
         <button onClick={() => sendData("", "bReturnToZero", "")}>

@@ -8,6 +8,9 @@ const useBluetoothData = () => {
         key: string,
         data: string
       ) => {
+        console.log("Attempting to send: '", data, "' to Key: ", key);
+        
+
         if (characteristic) {
           try {
             const encoder = new TextEncoder();

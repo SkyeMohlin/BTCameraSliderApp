@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import useBluetoothData from "../useBluetoothData";
 
 export interface Point {
   x: number;
@@ -11,32 +12,34 @@ export interface Point {
 }
 
 const BezierCurve: React.FC = () => {
+  const { sendData } = useBluetoothData();
+
   const [points, setPoints] = useState<Point[]>([
     {
       x: 50,
-      y: 200,
-      inTx: 30,
-      inTy: 150,
-      outTx: 100,
+      y: 50,
+      inTx: 40,
+      inTy: 50,
+      outTx: 60,
       outTy: 50,
       joinedTangents: true,
     },
     {
       x: 150,
-      y: 200,
-      inTx: 150,
+      y: 150,
+      inTx: 140,
       inTy: 150,
-      outTx: 150,
-      outTy: 50,
+      outTx: 160,
+      outTy: 150,
       joinedTangents: true,
     },
     {
       x: 250,
-      y: 200,
-      inTx: 250,
-      inTy: 150,
-      outTx: 200,
-      outTy: 50,
+      y: 250,
+      inTx: 240,
+      inTy: 250,
+      outTx: 260,
+      outTy: 250,
       joinedTangents: true,
     },
   ]);
@@ -174,72 +177,91 @@ const BezierCurve: React.FC = () => {
   }, [onMouseMove, onMouseUp]);
 
   return (
-    <svg
-      width="300"
-      height="300"
-      style={{ border: "1px solid black" }}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-    >
-      {/* Path that represents the cubic Bézier curve */}
-      {points.map((p, i) => (
-        <React.Fragment key={i}>
-          <line
-            x1={p.x}
-            y1={p.y}
-            x2={p.inTx}
-            y2={p.inTy}
-            stroke="gray"
-            strokeWidth={2}
-            strokeOpacity={0.5}
-            strokeDasharray={10}
-          />
+    <>
+      <svg
+        width="300"
+        height="300"
+        style={{ border: "1px solid black" }}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+      >
+        {/* Path that represents the cubic Bézier curve */}
+        {points.map((p, i) => (
+          <React.Fragment key={i}>
+            <line
+              x1={p.x}
+              y1={p.y}
+              x2={p.inTx}
+              y2={p.inTy}
+              stroke="gray"
+              strokeWidth={2}
+              strokeOpacity={0.5}
+              strokeDasharray={10}
+            />
 
-          <line
-            x1={p.x}
-            y1={p.y}
-            x2={p.outTx}
-            y2={p.outTy}
-            stroke="gray"
-            strokeWidth={2}
-            strokeOpacity={0.5}
-            strokeDasharray={10}
-          />
+            <line
+              x1={p.x}
+              y1={p.y}
+              x2={p.outTx}
+              y2={p.outTy}
+              stroke="gray"
+              strokeWidth={2}
+              strokeOpacity={0.5}
+              strokeDasharray={10}
+            />
 
-          {i < points.length - 1 && (
-            <path d={drawCurve(i)} stroke="blue" strokeWidth="2" fill="none" />
-          )}
+            {i < points.length - 1 && (
+              <path
+                d={drawCurve(i)}
+                stroke="blue"
+                strokeWidth="2"
+                fill="none"
+              />
+            )}
 
-          <circle
-            cx={p.x}
-            cy={p.y}
-            r={5}
-            fill="orange"
-            onMouseDown={(e) => onMouseDown(i, "anchor", e)}
-            onTouchStart={(e) => onMouseDown(i, "anchor", e)}
-            onDoubleClick={() => onDoubleClickAnchor(i)}
-          />
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r={10}
+              fill="orange"
+              onMouseDown={(e) => onMouseDown(i, "anchor", e)}
+              onTouchStart={(e) => onMouseDown(i, "anchor", e)}
+              onDoubleClick={() => onDoubleClickAnchor(i)}
+            />
 
-          <circle
-            cx={p.inTx}
-            cy={p.inTy}
-            r={5}
-            fill="green"
-            onMouseDown={(e) => onMouseDown(i, "in-tangent", e)}
-            onTouchStart={(e) => onMouseDown(i, "in-tangent", e)}
-          />
+            <circle
+              cx={p.inTx}
+              cy={p.inTy}
+              r={7}
+              fill="green"
+              onMouseDown={(e) => onMouseDown(i, "in-tangent", e)}
+              onTouchStart={(e) => onMouseDown(i, "in-tangent", e)}
+            />
 
-          <circle
-            cx={p.outTx}
-            cy={p.outTy}
-            r={5}
-            fill="blue"
-            onMouseDown={(e) => onMouseDown(i, "out-tangent", e)}
-            onTouchStart={(e) => onMouseDown(i, "out-tangent", e)}
-          />
-        </React.Fragment>
-      ))}
-    </svg>
+            <circle
+              cx={p.outTx}
+              cy={p.outTy}
+              r={7}
+              fill="green"
+              onMouseDown={(e) => onMouseDown(i, "out-tangent", e)}
+              onTouchStart={(e) => onMouseDown(i, "out-tangent", e)}
+            />
+          </React.Fragment>
+        ))}
+      </svg>
+      <button
+        onClick={() => {
+          let stringPoints: string = "";
+          points.forEach((p) => {
+            stringPoints = stringPoints.concat(`{x: ${p.x}, y: ${p.y},}`);
+          });
+
+          sendData("string", "XAxisPoints", stringPoints);
+        }}
+      >
+        Send Points
+      </button>
+    </>
   );
 };
 

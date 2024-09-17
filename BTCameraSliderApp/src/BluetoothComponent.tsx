@@ -1,6 +1,7 @@
 // src/BluetoothComponent.js
 import { useState } from "react";
 import { Point } from "./components/BezierCurve";
+import useBluetooth from "./useBluetooth";
 
 const points: Point[] = [
   {
@@ -33,11 +34,8 @@ const points: Point[] = [
 ];
 
 const BluetoothComponent = () => {
-  const [device, setDevice] = useState<BluetoothDevice>();
-  const [characteristic, setCharacteristic] =
-    useState<BluetoothRemoteGATTCharacteristic>();
-
-  const [on, setOn] = useState("OFF");
+  const { device, setDevice, characteristic, setCharacteristic } =
+    useBluetooth();
 
   let stringPoints: string = "";
   points.forEach((p) => {
@@ -70,25 +68,19 @@ const BluetoothComponent = () => {
     }
   };
 
-  const sendData = async () => {
+  const sendData = async (
+    type: string = "string",
+    key: string,
+    data: string
+  ) => {
     if (characteristic) {
       try {
         const encoder = new TextEncoder();
 
-        let stringPoints: string = "";
-        points.forEach((p) => {
-          stringPoints = stringPoints.concat(`{x: ${p.x}, y: ${p.y},}`);
-        });
-
-        if (on == "ON") {
-          setOn("OFF");
-        } else {
-          setOn("ON");
-        }
-        const data = encoder.encode(
-          `{type: string, key: XAxisPoints, value: ${stringPoints}}`
+        const encodedData = encoder.encode(
+          `{type: ${type}, key: ${key}, value: ${data}}`
         );
-        await characteristic.writeValue(data);
+        await characteristic.writeValue(encodedData);
         console.log("Data sent successfully");
       } catch (error) {
         console.error("Error sending data:", error);
@@ -102,9 +94,29 @@ const BluetoothComponent = () => {
     <div>
       <p>{device?.name}</p>
       <p>{characteristic?.uuid}</p>
-      <p>{on}</p>
-      <button onClick={requestDevice}>Connect to BLE Device</button>
-      <button onClick={sendData}>Send Data</button>
+      <div
+        className="buttons-area"
+        style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+      >
+        <button onClick={requestDevice}>Connect to BLE Device</button>
+        <button
+          onClick={() => {
+            let stringPoints: string = "";
+            points.forEach((p) => {
+              stringPoints = stringPoints.concat(`{x: ${p.x}, y: ${p.y},}`);
+            });
+
+            sendData("string", "XAxisPoints", stringPoints);
+          }}
+        >
+          Send Points
+        </button>
+
+        <button onClick={() => sendData("", "bPlay", "")}>Play</button>
+        <button onClick={() => sendData("", "bReturnToZero", "")}>
+          Return to Zero
+        </button>
+      </div>
     </div>
   );
 };

@@ -8,7 +8,10 @@ const ArrowArea = () => {
     <div className="arrow-area">
       <button
         onMouseDown={() => sendData("", "up", "press")}
+        onTouchStart={() => sendData("", "up", "press")}
+        onMouseLeave={() => sendData("", "up", "release")}
         onMouseUp={() => sendData("", "up", "release")}
+        onTouchEnd={() => sendData("", "up", "release")}
         style={{ gridColumn: "2" }}
       >
         {"^"}

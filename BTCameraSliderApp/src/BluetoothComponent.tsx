@@ -1,5 +1,4 @@
 // src/BluetoothComponent.js
-import { useState } from "react";
 import { Point } from "./components/BezierCurve";
 import useBluetooth from "./useBluetooth";
 

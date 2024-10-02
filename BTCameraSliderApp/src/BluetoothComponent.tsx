@@ -46,6 +46,9 @@ const BluetoothComponent = () => {
         <button onClick={() => sendData("", "bReturnToZero", "")}>
           Return to Zero
         </button>
+        <button onClick={() => sendData("", "recordPosition", "")}>
+          Record Position
+        </button>
       </div>
     </div>
   );

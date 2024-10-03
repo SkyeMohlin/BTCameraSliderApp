@@ -39,11 +39,11 @@ const ArrowArea = () => {
           {"Pan CCW"}
         </SteerButton>
         <SteerButton
-          onPress={() => sendData("", "panCCW", "press")}
-          onRelease={() => sendData("", "panCCW", "release")}
+          onPress={() => sendData("", "panCW", "press")}
+          onRelease={() => sendData("", "panCW", "release")}
           style={{ gridColumn: "3" }}
         >
-          {"Pan CCW"}
+          {"Pan CW"}
         </SteerButton>
         <SteerButton
           onPress={() => sendData("", "tiltDown", "press")}

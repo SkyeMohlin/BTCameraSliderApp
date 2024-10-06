@@ -1,4 +1,5 @@
 // src/BluetoothComponent.js
+import FlexBox from "./components/FlexBox";
 import useBluetooth from "./useBluetooth";
 import useBluetoothData from "./useBluetoothData";
 
@@ -49,6 +50,10 @@ const BluetoothComponent = () => {
         <button onClick={() => sendData("", "recordPosition", "")}>
           Record Position
         </button>
+        <FlexBox>
+          <button onClick={() => sendData("", "changeKP", "-0.1")}>kP-;</button>
+          <button onClick={() => sendData("", "changeKP", "0.1")}>kP+;</button>
+        </FlexBox>
       </div>
     </div>
   );

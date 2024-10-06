@@ -15,10 +15,10 @@ const SteerButton = ({
 }: SteerButtonProps) => {
   return (
     <button
-      onMouseDown={onPress}
+      //onMouseDown={onPress}
       onTouchStart={onPress}
-      onMouseLeave={onRelease}
-      onMouseUp={onRelease}
+      //onMouseLeave={onRelease}
+      //onMouseUp={onRelease}
       onTouchEnd={onRelease}
       style={style || ""}
     >

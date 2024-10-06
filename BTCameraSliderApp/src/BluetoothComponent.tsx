@@ -56,12 +56,16 @@ const BluetoothComponent = () => {
           <button onClick={() => sendData("", "changeKP", "1")}>kP+;</button>
         </FlexBox>
         <FlexBox>
-          <button onClick={() => sendData("", "changeKI", "-0.1")}>kI-;</button>
-          <button onClick={() => sendData("", "changeKI", "0.1")}>kI+;</button>
+          <button onClick={() => sendData("", "changeKI", "-0.01")}>
+            kI-;
+          </button>
+          <button onClick={() => sendData("", "changeKI", "0.01")}>kI+;</button>
         </FlexBox>
         <FlexBox>
-          <button onClick={() => sendData("", "changeKD", "-0.1")}>kD-;</button>
-          <button onClick={() => sendData("", "changeKD", "0.1")}>kD+;</button>
+          <button onClick={() => sendData("", "changeKD", "-0.01")}>
+            kD-;
+          </button>
+          <button onClick={() => sendData("", "changeKD", "0.01")}>kD+;</button>
         </FlexBox>
       </div>
     </div>

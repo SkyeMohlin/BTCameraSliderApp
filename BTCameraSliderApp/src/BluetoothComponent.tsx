@@ -51,8 +51,8 @@ const BluetoothComponent = () => {
           Record Position
         </button>
         <FlexBox>
-          <button onClick={() => sendData("", "changeKP", "-0.1")}>kP-;</button>
-          <button onClick={() => sendData("", "changeKP", "0.1")}>kP+;</button>
+          <button onClick={() => sendData("", "changeKP", "-10")}>kP-;</button>
+          <button onClick={() => sendData("", "changeKP", "10")}>kP+;</button>
         </FlexBox>
         <FlexBox>
           <button onClick={() => sendData("", "changeKI", "-0.1")}>kI-;</button>

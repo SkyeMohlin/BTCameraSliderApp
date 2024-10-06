@@ -43,6 +43,7 @@ const BluetoothComponent = () => {
       >
         <button onClick={requestDevice}>Connect to BLE Device</button>
 
+        <button onClick={() => sendData("", "calibrate", "")}>Calibrate</button>
         <button onClick={() => sendData("", "bPlay", "")}>Play</button>
         <button onClick={() => sendData("", "bReturnToZero", "")}>
           Return to Zero

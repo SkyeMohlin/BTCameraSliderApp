@@ -280,7 +280,9 @@ const BezierCurve: React.FC = () => {
         onClick={() => {
           let stringPoints: string = "";
           points.forEach((p) => {
-            stringPoints = stringPoints.concat(`{x: ${p.time}, y: ${p.pos},}`);
+            stringPoints = stringPoints.concat(
+              `{time: ${p.time}, pos: ${p.pos}, inTTime: ${p.pos}, inTPos: ${p.pos}, outTTime: ${p.pos}, outTPos: ${p.pos},}`
+            );
           });
 
           sendData("string", "XAxisPoints", stringPoints);

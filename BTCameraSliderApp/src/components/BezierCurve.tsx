@@ -281,7 +281,8 @@ const BezierCurve: React.FC = () => {
           let stringPoints: string = "";
           points.forEach((p) => {
             stringPoints = stringPoints.concat(
-              `{time: ${p.time}, pos: ${p.pos}, inTTime: ${p.pos}, inTPos: ${p.pos}, outTTime: ${p.pos}, outTPos: ${p.pos},}`
+              `{time: ${p.time}, pos: ${p.pos},}`
+              // `{time: ${p.time}, pos: ${p.pos}, inTTime: ${p.pos}, inTPos: ${p.pos}, outTTime: ${p.pos}, outTPos: ${p.pos},}`
             );
           });
 

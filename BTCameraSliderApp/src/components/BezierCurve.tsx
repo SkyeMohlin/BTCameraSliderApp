@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import useBluetoothData from "../useBluetoothData";
 
 export interface Point {
-  x: number;
-  y: number;
-  inTx: number;
-  inTy: number;
-  outTx: number;
-  outTy: number;
+  time: number;
+  pos: number;
+  inTTime: number;
+  inTPos: number;
+  outTTime: number;
+  outTPos: number;
   joinedTangents: boolean;
 }
 
@@ -16,30 +16,30 @@ const BezierCurve: React.FC = () => {
 
   const [points, setPoints] = useState<Point[]>([
     {
-      x: 50,
-      y: 50,
-      inTx: 40,
-      inTy: 50,
-      outTx: 60,
-      outTy: 50,
+      time: 0,
+      pos: 0,
+      inTTime: -1,
+      inTPos: 0,
+      outTTime: 1,
+      outTPos: 0,
       joinedTangents: true,
     },
     {
-      x: 150,
-      y: 150,
-      inTx: 140,
-      inTy: 150,
-      outTx: 160,
-      outTy: 150,
+      time: 2,
+      pos: 100,
+      inTTime: -1,
+      inTPos: -0,
+      outTTime: 1,
+      outTPos: 0,
       joinedTangents: true,
     },
     {
-      x: 250,
-      y: 250,
-      inTx: 240,
-      inTy: 250,
-      outTx: 260,
-      outTy: 250,
+      time: 4,
+      pos: 0,
+      inTTime: -1,
+      inTPos: -0,
+      outTTime: 1,
+      outTPos: 0,
       joinedTangents: true,
     },
   ]);
@@ -65,9 +65,41 @@ const BezierCurve: React.FC = () => {
     }
 
     return {
-      x: clientX - svg.left,
-      y: clientY - svg.top,
+      x: (clientX - svg.left) / tScale,
+      y: (clientY - svg.top) / pScale,
     };
+  };
+
+  const pScale: number = 1;
+  const tScale: number = 100;
+
+  const scaledPoint = (
+    inPoint: Point,
+    posScale: number = pScale,
+    timeScale: number = tScale
+  ) => {
+    const outPoint: Point = {
+      time: inPoint.time,
+      pos: inPoint.pos,
+      inTTime: inPoint.inTTime,
+      inTPos: inPoint.inTPos,
+      outTTime: inPoint.outTTime,
+      outTPos: inPoint.outTPos,
+      joinedTangents: inPoint.joinedTangents,
+    };
+
+    outPoint.pos *= posScale;
+    outPoint.time *= timeScale;
+    outPoint.inTPos *= posScale;
+    outPoint.inTPos += outPoint.pos;
+    outPoint.inTTime *= timeScale;
+    outPoint.inTTime += outPoint.time;
+    outPoint.outTPos *= posScale;
+    outPoint.outTPos += outPoint.pos;
+    outPoint.outTTime *= timeScale;
+    outPoint.outTTime += outPoint.time;
+
+    return outPoint;
   };
 
   const onMouseDown = (
@@ -87,41 +119,28 @@ const BezierCurve: React.FC = () => {
       const { pointIndex, type } = draggingPoint;
       const newPoints = [...points];
       const { x: newX, y: newY } = getCoordinates(e);
-
       if (type === "anchor") {
-        const deltaX = newX - newPoints[pointIndex].x;
-        const deltaY = newY - newPoints[pointIndex].y;
-        newPoints[pointIndex].x = newX;
-        newPoints[pointIndex].y = newY;
-
-        newPoints[pointIndex].inTx += deltaX;
-        newPoints[pointIndex].inTy += deltaY;
-        newPoints[pointIndex].outTx += deltaX;
-        newPoints[pointIndex].outTy += deltaY;
+        newPoints[pointIndex].time = newX;
+        newPoints[pointIndex].pos = newY;
       } else if (type === "in-tangent") {
-        const restrictedInTx = Math.min(newX, newPoints[pointIndex].x);
-        newPoints[pointIndex].inTx = restrictedInTx;
-        newPoints[pointIndex].inTy = newY;
-
+        const deltaX = newX - newPoints[pointIndex].time;
+        const deltaY = newY - newPoints[pointIndex].pos;
+        newPoints[pointIndex].inTTime = deltaX;
+        newPoints[pointIndex].inTPos = deltaY;
         if (newPoints[pointIndex].joinedTangents) {
-          const deltaX = newPoints[pointIndex].x - newPoints[pointIndex].inTx;
-          const deltaY = newPoints[pointIndex].y - newPoints[pointIndex].inTy;
-          newPoints[pointIndex].outTx = newPoints[pointIndex].x + deltaX;
-          newPoints[pointIndex].outTy = newPoints[pointIndex].y + deltaY;
+          newPoints[pointIndex].outTTime = -newPoints[pointIndex].inTTime;
+          newPoints[pointIndex].outTPos = -newPoints[pointIndex].inTPos;
         }
       } else if (type === "out-tangent") {
-        const restrictedOutTx = Math.max(newX, newPoints[pointIndex].x);
-        newPoints[pointIndex].outTx = restrictedOutTx;
-        newPoints[pointIndex].outTy = newY;
-
+        const deltaX = newX - newPoints[pointIndex].time;
+        const deltaY = newY - newPoints[pointIndex].pos;
+        newPoints[pointIndex].outTTime = deltaX;
+        newPoints[pointIndex].outTPos = deltaY;
         if (newPoints[pointIndex].joinedTangents) {
-          const deltaX = newPoints[pointIndex].x - newPoints[pointIndex].outTx;
-          const deltaY = newPoints[pointIndex].y - newPoints[pointIndex].outTy;
-          newPoints[pointIndex].inTx = newPoints[pointIndex].x + deltaX;
-          newPoints[pointIndex].inTy = newPoints[pointIndex].y + deltaY;
+          newPoints[pointIndex].inTTime = -newPoints[pointIndex].outTTime;
+          newPoints[pointIndex].inTPos = -newPoints[pointIndex].outTPos;
         }
       }
-
       setPoints(newPoints);
     }
   };
@@ -133,23 +152,18 @@ const BezierCurve: React.FC = () => {
   const onDoubleClickAnchor = (index: number) => {
     const newPoints = [...points];
     newPoints[index].joinedTangents = !newPoints[index].joinedTangents;
-
     if (newPoints[index].joinedTangents) {
-      const deltaX = newPoints[index].x - newPoints[index].inTx;
-      const deltaY = newPoints[index].y - newPoints[index].inTy;
-      newPoints[index].outTx = newPoints[index].x + deltaX;
-      newPoints[index].outTy = newPoints[index].y + deltaY;
+      newPoints[index].outTTime = -newPoints[index].inTTime;
+      newPoints[index].outTPos = -newPoints[index].inTPos;
     }
-
     setPoints(newPoints);
   };
 
   const drawCurve = (i: number) => {
-    return `M ${points[i].x},${points[i].y} C ${points[i].outTx},${
-      points[i].outTy
-    } ${points[i + 1].inTx},${points[i + 1].inTy} ${points[i + 1].x},${
-      points[i + 1].y
-    }`;
+    const p1 = scaledPoint(points[i]);
+    const p2 = scaledPoint(points[i + 1]);
+
+    return `M ${p1.time},${p1.pos} C ${p1.outTTime},${p1.outTPos} ${p2.inTTime},${p2.inTPos} ${p2.time},${p2.pos}`;
   };
 
   useEffect(() => {
@@ -179,81 +193,94 @@ const BezierCurve: React.FC = () => {
   return (
     <>
       <svg
-        width="300"
+        width="500"
         height="300"
         style={{ border: "1px solid black" }}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
       >
         {/* Path that represents the cubic Bézier curve */}
-        {points.map((p, i) => (
-          <React.Fragment key={i}>
-            <line
-              x1={p.x}
-              y1={p.y}
-              x2={p.inTx}
-              y2={p.inTy}
-              stroke="gray"
-              strokeWidth={2}
-              strokeOpacity={0.5}
-              strokeDasharray={10}
-            />
+        {points.map((p, i) => {
+          const point: Point = scaledPoint(p);
 
-            <line
-              x1={p.x}
-              y1={p.y}
-              x2={p.outTx}
-              y2={p.outTy}
-              stroke="gray"
-              strokeWidth={2}
-              strokeOpacity={0.5}
-              strokeDasharray={10}
-            />
-
-            {i < points.length - 1 && (
-              <path
-                d={drawCurve(i)}
-                stroke="blue"
-                strokeWidth="2"
-                fill="none"
+          return (
+            <React.Fragment key={i}>
+              <line
+                x1={point.time}
+                y1={point.pos}
+                x2={point.inTTime}
+                y2={point.inTPos}
+                stroke="gray"
+                strokeWidth={2}
+                strokeOpacity={0.5}
+                strokeDasharray={10}
               />
-            )}
 
-            <circle
-              cx={p.x}
-              cy={p.y}
-              r={10}
-              fill="orange"
-              onMouseDown={(e) => onMouseDown(i, "anchor", e)}
-              onTouchStart={(e) => onMouseDown(i, "anchor", e)}
-              onDoubleClick={() => onDoubleClickAnchor(i)}
-            />
+              <line
+                x1={point.time}
+                y1={point.pos}
+                x2={point.outTTime}
+                y2={point.outTPos}
+                stroke="gray"
+                strokeWidth={2}
+                strokeOpacity={0.5}
+                strokeDasharray={10}
+              />
 
-            <circle
-              cx={p.inTx}
-              cy={p.inTy}
-              r={7}
-              fill="green"
-              onMouseDown={(e) => onMouseDown(i, "in-tangent", e)}
-              onTouchStart={(e) => onMouseDown(i, "in-tangent", e)}
-            />
+              {i < points.length - 1 && (
+                <path
+                  d={drawCurve(i)}
+                  stroke="blue"
+                  strokeWidth="2"
+                  fill="none"
+                />
+              )}
 
-            <circle
-              cx={p.outTx}
-              cy={p.outTy}
-              r={7}
-              fill="green"
-              onMouseDown={(e) => onMouseDown(i, "out-tangent", e)}
-              onTouchStart={(e) => onMouseDown(i, "out-tangent", e)}
-            />
-          </React.Fragment>
-        ))}
+              <circle
+                cx={point.time}
+                cy={point.pos}
+                r={10}
+                fill="orange"
+                onMouseDown={(e) => onMouseDown(i, "anchor", e)}
+                onTouchStart={(e) => onMouseDown(i, "anchor", e)}
+                onDoubleClick={() => onDoubleClickAnchor(i)}
+              />
+
+              <circle
+                cx={point.inTTime}
+                cy={point.inTPos}
+                r={7}
+                fill="green"
+                onMouseDown={(e) => onMouseDown(i, "in-tangent", e)}
+                onTouchStart={(e) => onMouseDown(i, "in-tangent", e)}
+              />
+
+              <circle
+                cx={point.outTTime}
+                cy={point.outTPos}
+                r={7}
+                fill="green"
+                onMouseDown={(e) => onMouseDown(i, "out-tangent", e)}
+                onTouchStart={(e) => onMouseDown(i, "out-tangent", e)}
+              />
+
+              <text
+                x={point.time}
+                y={point.pos + 25}
+                fontSize={12}
+                fill="black"
+              >
+                {`{${p.time.toFixed(2)}s, ${p.pos.toFixed(0)}mm}`}
+              </text>
+            </React.Fragment>
+          );
+        })}
       </svg>
       <button
         onClick={() => {
           let stringPoints: string = "";
           points.forEach((p) => {
-            stringPoints = stringPoints.concat(`{x: ${p.x}, y: ${p.y},}`);
+            stringPoints = stringPoints.concat(`{x: ${p.time}, y: ${p.pos},}`);
           });
 
           sendData("string", "XAxisPoints", stringPoints);
